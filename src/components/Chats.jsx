@@ -3,8 +3,10 @@ import { doc, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState, useContext} from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
+import CryptoJS from 'crypto-js';
 import {db} from "../firebase";
 //import add from "../img/a5.jpg";
+
 
 const Chats = () => {
 
@@ -12,6 +14,10 @@ const Chats = () => {
 
     const {currentUser} = useContext(AuthContext);
     const {dispatch} = useContext(ChatContext);
+
+    const [decryptedText, setDecryptedText] = useState('');
+    const key = 'my-secret-key';
+   
 
     useEffect(() => {
         const getChats = () => {
@@ -31,6 +37,8 @@ const Chats = () => {
     const handleSelect = (u) => {
         dispatch({type:"CHANGE_USER", payload: u });
     }
+
+    
     
     return (
         <div className="chats">
@@ -39,7 +47,8 @@ const Chats = () => {
                     <img src={chat[1].userInfo.photoURL} alt="" />
                     <div className="userChatInfo">
                         <span>{chat[1].userInfo.displayName}</span>
-                        <p>{chat[1].lastMessage?.text}</p>
+                        <p>{  ((CryptoJS.AES.decrypt(chat[1].lastMessage?.text , key)).toString(CryptoJS.enc.Utf8))
+                        }</p>
                     </div>
                 </div>
             ))}

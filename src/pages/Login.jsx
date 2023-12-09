@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-//import add from "../img/a4.png";
+import add from "../img/a4.png";
 
 const Login = () => {
     const [err, setErr] = useState(false);
@@ -32,6 +32,7 @@ const Login = () => {
                     <input type="email" placeholder="Ingresa tu Correo Electronico"/>
                     <input type="password" placeholder="Ingresa tu Contraseña si"/>
                     <button>Entrar</button>
+                    <button>Inicia Sesion desde Google</button>
                     {err && <span>Error al Ingresar, intentalo de nuevo</span>}
                 </form>
                 <p>No tienes Cuenta? <Link to="/register">Registrate</Link></p>

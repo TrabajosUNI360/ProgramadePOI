@@ -7,17 +7,33 @@ import { arrayUnion, doc, serverTimestamp, Timestamp, updateDoc } from "firebase
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import CryptoJS from 'crypto-js';
 
 const Input = () => {
     const [ text, setText ] = useState("");
     const [ img, setImg ] = useState(null);
     const [ fileI, setFileI ] = useState("");
+    const [ habilitarEncriptacion, setHabilitarEncriptacion ] = useState(false);
 
     const {currentUser} = useContext(AuthContext)
     const {data} = useContext(ChatContext)
 
-    const handleSend = async () => {
+    const key = 'my-secret-key'; 
+    let encrypted;
+    let textoEnc;
 
+    const changeEncriptacion = () => {
+        setHabilitarEncriptacion(!habilitarEncriptacion);
+    }
+
+    const enviarMensaje = async () => {
+        const encrypted = CryptoJS.AES.encrypt(text, key);
+        setText(encrypted.toString());
+    }
+
+    const handleSend = async () => {
+        encrypted = CryptoJS.AES.encrypt(text, key);
+        textoEnc = text;
         if (img){
             const storageRef = ref(storage, uuid());
 
@@ -75,30 +91,41 @@ const Input = () => {
                 );
 
         }else{
+            if(habilitarEncriptacion == true){
+                await enviarMensaje();
+                textoEnc = encrypted.toString();
+            }
+
+            let text = textoEnc;
             await updateDoc(doc(db, "chats", data.chatId), {
                 messages: arrayUnion({
                     id: uuid(),
                     text,
+                    encriptado: habilitarEncriptacion,
                     senderId: currentUser.uid,
                     date: Timestamp.now(),
                 }),
 
             });
         }
-
-        await updateDoc(doc(db, "userChats", currentUser.uid), {
-            [data.chatId + ".lastMessage"]:{
-                text
-            },
-            [data.chatId + ".date"]: serverTimestamp(),
-        });
-
-        await updateDoc(doc(db, "userChats", data.user.uid), {
-            [data.chatId + ".lastMessage"]:{
-                text
-            },
-            [data.chatId + ".date"]: serverTimestamp(),
-        }); 
+        
+        {
+            textoEnc = encrypted.toString();
+            let text = textoEnc;
+            await updateDoc(doc(db, "userChats", currentUser.uid), {
+                [data.chatId + ".lastMessage"]:{
+                    text
+                },
+                [data.chatId + ".date"]: serverTimestamp(),
+            });
+    
+            await updateDoc(doc(db, "userChats", data.user.uid), {
+                [data.chatId + ".lastMessage"]:{
+                    text
+                },
+                [data.chatId + ".date"]: serverTimestamp(),
+            }); 
+        }
 
         setText("");
         setImg(null);
@@ -119,8 +146,10 @@ const Input = () => {
                         <img src={Attach} alt="" />
                     </label>
                 </div>
+
             </div>
             <button onClick={handleSend}>Enviar</button>
+            <label><input type="checkbox" onChange={changeEncriptacion} value={habilitarEncriptacion}/> Encriptar</label>
         </div>
     )
 }
