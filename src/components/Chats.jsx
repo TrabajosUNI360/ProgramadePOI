@@ -47,7 +47,9 @@ const Chats = () => {
                     <img src={chat[1].userInfo.photoURL} alt="" />
                     <div className="userChatInfo">
                         <span>{chat[1].userInfo.displayName}</span>
-                        <p>{  ((CryptoJS.AES.decrypt(chat[1].lastMessage?.text , key)).toString(CryptoJS.enc.Utf8))
+                        <p>{ chat[1].lastMessage?
+                                ((CryptoJS.AES.decrypt(chat[1].lastMessage?.text , key)).toString(CryptoJS.enc.Utf8))
+                                :""
                         }</p>
                     </div>
                 </div>

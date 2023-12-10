@@ -18,6 +18,7 @@ const Register = () => {
         const email = e.target[1].value;    
         const password = e.target[2].value;
         const file = e.target[3].files[0];
+        const estado = "Disponible";
 
         //const auth = getAuth();
         try{
@@ -42,6 +43,7 @@ const Register = () => {
                         uid: res.user.uid,
                         displayName,
                         email,
+                        estado,
                         photoURL : downloadURL
                     });
 
